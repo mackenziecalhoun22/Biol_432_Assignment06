@@ -1,0 +1,68 @@
+---
+title: "BioL_432_Assignment06_MCalhoun"
+output: html_document
+date: "2025-02-10"
+---
+**Step 1 - no code required**
+**Step 2 - no code required**
+**Step 3**
+```{r}
+library(doParallel)
+library(parallel)
+library(foreach)
+```
+**Step 4**
+```{r}
+num_cores <- detectCores()
+num_cores
+```
+*There are 8 cores in my system*
+
+**Step 5**
+```{r}
+set.seed(123)
+start_time_serial <- Sys.time()
+for(i in 1:4000) {
+  mean(rnorm(100000, mean = 10, sd = 3))
+}
+```
+
+**Step 6**
+```{r}
+end_time_serial <- Sys.time()
+time_serial <- end_time_serial - start_time_serial
+print(paste("Serial Execution Time:", time_serial))
+```
+*Estimate of run time = 12.02*
+**Step 7**
+```{r}
+expected_parallel_time <- as.numeric(time_serial) / (num_cores - 1)
+print(paste("Expected Parallel Execution Time:", expected_parallel_time))
+```
+
+**Step 8**
+```{r}
+Cores <- makeCluster(num_cores - 1)
+doParallel::registerDoParallel(Cores)
+start_time_parallel <- Sys.time()
+```
+
+```{r}
+foreach(i=1:4000, .combine=c) %dopar% {
+  mean(rnorm(100000, mean = 10, sd = 3))
+}
+```
+**Step 9**
+```{r}
+end_time_parallel <- Sys.time()
+time_parallel <- end_time_parallel - start_time_parallel
+print(paste("Parallel Execution Time:", time_parallel))
+```
+**Step 10**
+```{r}
+compare <- as.numeric(time_serial) - as.numeric(time_parallel)
+print(paste("Speedup Achieved:", compare))
+print(paste("Theoretical vs. Actual Speedup:", expected_parallel_time, "vs", time_parallel))
+```
+
+*Serial execution = 'r time_serial' and parallel execution = 'r time_parallel.' The actual parallel execution took  longer than the theoretical because of parallel processing (ex. setting up results).*
